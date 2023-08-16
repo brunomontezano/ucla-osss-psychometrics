@@ -63,7 +63,7 @@ ds_subset |>
   ggplot2::labs(x = "UCLA total score", y = "Number of individuals")
 ```
 
-# What is the correlation between the items?
+## What is the correlation between the items?
 
 ```{r item-cor}
 ds_subset |> 
@@ -75,4 +75,20 @@ ds_subset |>
                          ggtheme = ggplot2::theme_light(15, "IBM Plex Sans"))
 ```
 
+## What is the average score of the UCLA in the sample?
+
+```{r summary-items-and-total}
+ds_subset |> 
+  dplyr::summarise(
+    dplyr::across(c(ucla_1, ucla_2, ucla_3, ucla_total),
+                   list(
+                     mean = \(x) mean(x, na.rm = TRUE),
+                     sd = \(x) sd(x, na.rm = TRUE)
+                  ))
+  ) |> 
+  tidyr::pivot_longer(cols = dplyr::everything(),
+                      names_to = c("item", "summary"),
+                      values_to = "value",
+                      names_pattern = "^ucla_(.*)_(.*$)")
+```
 
