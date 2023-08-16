@@ -1,0 +1,78 @@
+---
+title: "Psychometric properties of OSSS-3 and UCLA-3"
+author:
+  - name: Bruno Braga Montezano
+    id: jc
+    orcid: 0000-0002-4627-1776
+    email: bmontezano@hcpa.edu.br
+    affiliation: 
+      - name: Federal University of Rio Grande do Sul
+        city: Porto Alegre
+        state: RS
+        url: https://www.ufrgs.br/ppgpsiquiatria/en/home-english/
+abstract: > 
+  This project aims to assess the psychometric properties of two instruments:
+  OSSS-3 (social support) and UCLA-3 (loneliness).
+keywords:
+  - Psychometrics
+  - Psychiatry
+copyright: 
+  holder: Bruno Braga Montezano
+  year: 2023
+funding: "The author receives scholarship from Coordenação de Aperfeiçoamento de Pessoal de Nível Superior."
+date: today
+format: html
+theme: journal
+df-print: paged
+echo: false
+---
+
+```{r setup-ggplot2}
+ggplot2::theme_set(ggplot2::theme_light(15, "IBM Plex Sans"))
+```
+
+
+## Read the data
+
+```{r read-data}
+ds <- haven::read_sav("data/alliance_covid-psy_four_waves_weights.sav") |> 
+  janitor::clean_names()
+
+ds_subset <- ds |>
+  dplyr::select(state, region, color, age, gender_birth, sexual_orientation,
+                marital_status, children, education, unemployed,
+                ucla_1, ucla_2, ucla_3) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(ucla_total = sum(ucla_1, ucla_2, ucla_3)) |> 
+  dplyr::ungroup()
+  
+ds_subset |> 
+  head(10)
+```
+
+
+## How is the UCLA score distributed?
+
+```{r ucla-hist}
+#| message: false
+ds_subset |> 
+  ggplot2::ggplot(ggplot2::aes(x = ucla_total)) +
+  ggplot2::geom_histogram(fill = "royalblue",
+                          binwidth = 0.5) +
+  ggplot2::scale_x_continuous(n.breaks = 9) +
+  ggplot2::labs(x = "UCLA total score", y = "Number of individuals")
+```
+
+# What is the correlation between the items?
+
+```{r item-cor}
+ds_subset |> 
+  dplyr::select(dplyr::matches("ucla_[1-3]")) |> 
+  cor(method = "spearman") |> 
+  ggcorrplot::ggcorrplot(lab = TRUE,
+                         type = "upper",
+                         show.legend = FALSE,
+                         ggtheme = ggplot2::theme_light(15, "IBM Plex Sans"))
+```
+
+
